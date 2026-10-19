@@ -1,0 +1,1 @@
+{"version":3,"file":"bearer-token.js","sourceRoot":"","sources":["../../../src/common/security/bearer-token.ts"],"names":[],"mappings":";;AAKA,kCAEC;AAFD,SAAgB,WAAW,CAAC,MAA0B;IACpD,OAAO,MAAM,CAAC,CAAC,CAAC,sBAAsB,CAAC,IAAI,CAAC,MAAM,CAAC,EAAE,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,SAAS,CAAC;AACvE,CAAC"}

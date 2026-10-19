@@ -1,0 +1,1 @@
+var e=e=>e===`unknown`?`chats.messageType.unknownType`:`chats.messageType.${e}`;function t(t,n,r){let i=n===`type`?e(r):n===`kind`?`chats.kind.${r}`:void 0;return i?t(i,{defaultValue:r}):r}export{e as n,t};

@@ -23,18 +23,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Set environment variables for Chromium and Puppeteer
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     NODE_ENV=production \
     PORT=2785
-
-WORKDIR /app
-
-# Copy package files and build OpenWA
-COPY OpenWA/package*.json ./OpenWA/
-WORKDIR /app/OpenWA
-RUN npm ci --include=dev && npm run build && npm prune --omit=dev
 
 WORKDIR /app
 
@@ -46,10 +38,14 @@ ENV PATH="/opt/venv/bin:$PATH"
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy all application code
+# Copy all application code (including pre-built OpenWA dist)
 COPY . .
 
-# Ensure start script is executable
+# Install production node dependencies
+WORKDIR /app/OpenWA
+RUN npm install --omit=dev --no-audit --no-fund
+
+WORKDIR /app
 RUN chmod +x start.sh
 
 EXPOSE 2785

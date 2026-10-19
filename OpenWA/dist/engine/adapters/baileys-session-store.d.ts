@@ -1,0 +1,67 @@
+import type { Chat, Contact as BaileysContact, WAMessage, WAMessageKey } from '@whiskeysockets/baileys';
+import { ChatSummary, Contact, MessageType } from '../interfaces/whatsapp-engine.interface';
+import type { LidMappingStore } from '../identity/lid-mapping-store.service';
+import { type ChatStateStore } from './baileys-chat-state-store.service';
+export declare const SESSION_STORE_MAP_CAP_DEFAULT = 5000;
+export declare class BaileysSessionStore {
+    private readonly lidStore?;
+    private readonly sessionId?;
+    private readonly chatStateStore?;
+    private readonly contacts;
+    private readonly chats;
+    private readonly lastMessages;
+    private readonly lastInbound;
+    private readonly lidToPn;
+    private readonly ephemeralByChat;
+    constructor(lidStore?: LidMappingStore | undefined, sessionId?: string | undefined, chatStateStore?: ChatStateStore | undefined);
+    upsertContacts(records?: Partial<BaileysContact>[]): void;
+    private assignDefined;
+    upsertChats(records?: Partial<Chat>[]): void;
+    removeChats(ids?: string[]): void;
+    private forgetChatState;
+    addLidMappings(mappings?: {
+        lid?: string;
+        pn?: string;
+    }[]): void;
+    recordKeyLidMappings(key: Pick<WAMessageKey, 'remoteJid' | 'remoteJidAlt' | 'participant' | 'participantAlt'>): void;
+    private lidPnPair;
+    private persistLidMapping;
+    recordMessage(msg: WAMessage, type?: MessageType): void;
+    recordMessageEdit(chatId: string, messageId: string, text: string, type?: MessageType): void;
+    private chatKey;
+    private chatTwins;
+    private recordEphemeralFromMessage;
+    extractEphemeralDuration(msg: WAMessage): number | undefined;
+    private contextExpiration;
+    listContacts(): Contact[];
+    findContact(id: string): Contact | null;
+    listChats(): ChatSummary[];
+    chatJid(chatId: string): string;
+    lastMessage(chatId: string): {
+        key: WAMessageKey;
+        timestamp: number;
+        jid: string;
+    } | null;
+    lastInboundMessage(chatId: string): {
+        key: WAMessageKey;
+        timestamp: number;
+    } | null;
+    private newestAcrossTwins;
+    getEphemeralExpiration(chatId: string): number | undefined;
+    resolvePhone(id: string): string | null;
+    toNeutralJid(jid: string): string;
+    toEngineJid(jid: string): string;
+    private toNeutralContact;
+    private toNeutralChat;
+    private isMuted;
+    private muteExpirationMs;
+    private persistChatState;
+    private stateKey;
+    private chatState;
+    private stateTwins;
+    private lidsByPhone;
+    private normalizeMuteEndTime;
+    private resolveContactName;
+    private contactDisplayName;
+    private toUnixSeconds;
+}
