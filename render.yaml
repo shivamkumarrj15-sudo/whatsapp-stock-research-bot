@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: whatsapp-equity-research-bot
+    env: docker
+    dockerfilePath: Dockerfile
+    plan: starter
+    disk:
+      name: openwa-sessions
+      mountPath: /app/OpenWA/data
+      sizeGB: 1
+    envVars:
+      - key: PORT
+        value: 2785
+      - key: RATE_LIMIT_SHORT_LIMIT
+        value: 1000
+      - key: RATE_LIMIT_MEDIUM_LIMIT
+        value: 100000
+      - key: RATE_LIMIT_LONG_LIMIT
+        value: 1000000
+      - key: NEWS_API_KEY
+        value: b6b587db14e5433999555b82bcec4cc5
+      - key: SCREENER_SESSION
+        value: 7mt0wjjc7djrz8w51cwftfmlldm1jpl7
+      - key: SCREENER_CSRF
+        value: sO2B2TNRXvyRQQrFRWivkQ5tdyXWd8eW
+      - key: GEMINI_API_KEY
+        sync: false

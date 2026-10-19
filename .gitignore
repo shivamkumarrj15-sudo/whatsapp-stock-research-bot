@@ -1,0 +1,9 @@
+node_modules/
+dist/
+__pycache__/
+*.pyc
+reports/*.pdf
+test_*.pdf
+data/
+*.log
+.env
