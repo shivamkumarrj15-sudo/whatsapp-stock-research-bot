@@ -8,7 +8,10 @@ import urllib.parse
 import base64
 from datetime import datetime
 import bs4
-import yfinance as yf
+try:
+    import yfinance as yf
+except Exception:
+    yf = None
 from pdf_generator import generate_stock_pdf
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -69,7 +72,7 @@ def get_company_news(query):
             url = f"https://news.google.com/rss/search?q={q_enc}&hl=en-IN&gl=IN&ceid=IN:en"
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
             xml_data = urllib.request.urlopen(req, timeout=10).read()
-            soup = bs4.BeautifulSoup(xml_data, "xml")
+            soup = bs4.BeautifulSoup(xml_data, "html.parser")
             for it in soup.find_all("item")[:3]:
                 title = it.find("title").text if it.find("title") else ""
                 articles.append(f"• *Google News*: {title}")
@@ -171,6 +174,8 @@ def get_screener_deep_data(query):
 
 # --- 4. Yahoo Finance Fallback ---
 def get_yfinance_data(symbol):
+    if yf is None:
+        return {}
     for sym in [symbol, f"{symbol}.NS", f"{symbol}.BO"]:
         try:
             t = yf.Ticker(sym)

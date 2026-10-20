@@ -1,10 +1,7 @@
-FROM node:20-bookworm-slim
+FROM node:22-bookworm-slim
 
-# Install Python, Chromium, and required system dependencies for Puppeteer
+# Install system dependencies, Chromium, and Python
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 \
-    python3-pip \
-    python3-venv \
     chromium \
     fonts-liberation \
     fonts-noto-color-emoji \
@@ -20,6 +17,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgbm1 \
     libasound2 \
     curl \
+    dumb-init \
+    python3 \
+    python3-pip \
+    python3-venv \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
@@ -30,24 +31,37 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
 
 WORKDIR /app
 
-# Setup Python virtual environment
+# Setup Python virtual environment & lightweight requirements
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Install Python requirements
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy all application code (including pre-built OpenWA dist)
 COPY . .
 
-# Install production node dependencies
+# Install OpenWA production dependencies with --ignore-scripts
 WORKDIR /app/OpenWA
-RUN npm install --omit=dev --no-audit --no-fund
+RUN npm ci --omit=dev --ignore-scripts \
+    && node scripts/patch-wwebjs-201832.js \
+    && node scripts/patch-wwebjs-newsletter-preview.js \
+    && node scripts/patch-wwebjs-status.js \
+    && node scripts/patch-wwebjs-ready-sync.js \
+    && node scripts/patch-wwebjs-participant-arity.js \
+    && node scripts/patch-wwebjs-block.js \
+    && node scripts/patch-wwebjs-group-description.js \
+    && node scripts/patch-wwebjs-media-id.js \
+    && node scripts/patch-wwebjs-send-error.js \
+    && node scripts/patch-baileys-appstate.js \
+    && node scripts/patch-baileys-newsletter-create.js \
+    && node scripts/patch-baileys-pairing.js \
+    && npm cache clean --force
 
 WORKDIR /app
 RUN chmod +x start.sh
 
 EXPOSE 2785
 
+ENTRYPOINT ["dumb-init", "--"]
 CMD ["./start.sh"]
