@@ -41,22 +41,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy all application code (including pre-built OpenWA dist)
 COPY . .
 
-# Install OpenWA production dependencies with --ignore-scripts
+# Install OpenWA production dependencies cleanly with --ignore-scripts
 WORKDIR /app/OpenWA
-RUN npm ci --omit=dev --ignore-scripts \
-    && node scripts/patch-wwebjs-201832.js \
-    && node scripts/patch-wwebjs-newsletter-preview.js \
-    && node scripts/patch-wwebjs-status.js \
-    && node scripts/patch-wwebjs-ready-sync.js \
-    && node scripts/patch-wwebjs-participant-arity.js \
-    && node scripts/patch-wwebjs-block.js \
-    && node scripts/patch-wwebjs-group-description.js \
-    && node scripts/patch-wwebjs-media-id.js \
-    && node scripts/patch-wwebjs-send-error.js \
-    && node scripts/patch-baileys-appstate.js \
-    && node scripts/patch-baileys-newsletter-create.js \
-    && node scripts/patch-baileys-pairing.js \
-    && npm cache clean --force
+RUN npm install --omit=dev --no-audit --no-fund --ignore-scripts && npm cache clean --force
 
 WORKDIR /app
 RUN chmod +x start.sh
