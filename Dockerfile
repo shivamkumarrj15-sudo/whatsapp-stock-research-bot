@@ -25,9 +25,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_SKIP_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
-    NODE_ENV=production \
-    PORT=2785
+    API_MASTER_KEY=owa_k1_51a2d39a164c4046f38e56e5bb62b535a01bb822c7676bfce6957dbc0b1bf97b \
+    NODE_ENV=production
 
 WORKDIR /app
 
@@ -43,12 +44,12 @@ COPY . .
 
 # Install OpenWA production dependencies cleanly with --ignore-scripts
 WORKDIR /app/OpenWA
-RUN npm install --omit=dev --no-audit --no-fund --ignore-scripts && npm cache clean --force
+RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 
 WORKDIR /app
 RUN chmod +x start.sh
 
-EXPOSE 2785
+EXPOSE 2785 10000
 
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["./start.sh"]

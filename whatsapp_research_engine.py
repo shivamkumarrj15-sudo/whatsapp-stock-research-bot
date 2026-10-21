@@ -20,10 +20,11 @@ if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8")
 
 # --- Configuration & Credentials ---
-OPENWA_URL = os.environ.get("OPENWA_URL", "http://localhost:2785")
+PORT = os.environ.get("PORT", "2785")
+OPENWA_URL = os.environ.get("OPENWA_URL", f"http://localhost:{PORT}")
 OPENWA_API_KEY = os.environ.get("OPENWA_API_KEY", "owa_k1_51a2d39a164c4046f38e56e5bb62b535a01bb822c7676bfce6957dbc0b1bf97b")
-SESSION_NAME = "shivam12"
-SESSION_ID = "e8cc96a9-270e-414c-a4df-2aa4ccf7d704"
+SESSION_NAME = os.environ.get("SESSION_NAME", "shivam12")
+SESSION_ID = os.environ.get("SESSION_ID", "e8cc96a9-270e-414c-a4df-2aa4ccf7d704")
 
 ALLOWED_TARGET_PATTERNS = ["8005844014", "9785260088", "180213069688971", "203388612530205"]
 
@@ -555,8 +556,39 @@ def handle_incoming_request(raw_text, chat_id):
     except Exception as pdf_err:
         print("[Notice on PDF generation/sending]:", pdf_err)
 
+def resolve_openwa_session():
+    global SESSION_ID
+    url = f"{OPENWA_URL}/api/sessions"
+    req = urllib.request.Request(url, headers={"X-API-Key": OPENWA_API_KEY})
+    try:
+        with urllib.request.urlopen(req, timeout=10) as res:
+            sessions = json.loads(res.read().decode("utf-8"))
+            if isinstance(sessions, list) and len(sessions) > 0:
+                SESSION_ID = sessions[0].get("id") or sessions[0].get("sessionId")
+                print(f"[*] Connected to OpenWA session: {SESSION_ID}")
+                return SESSION_ID
+    except Exception as e:
+        print("[Notice checking sessions]:", e)
+
+    # If no session exists, create one
+    try:
+        payload = json.dumps({"name": SESSION_NAME, "engine": "whatsapp-web.js"}).encode("utf-8")
+        req = urllib.request.Request(url, data=payload, headers={
+            "Content-Type": "application/json",
+            "X-API-Key": OPENWA_API_KEY
+        })
+        with urllib.request.urlopen(req, timeout=15) as res:
+            data = json.loads(res.read().decode("utf-8"))
+            SESSION_ID = data.get("id") or data.get("sessionId")
+            print(f"[*] Created new OpenWA session: {SESSION_ID}")
+            return SESSION_ID
+    except Exception as e:
+        print("[Notice creating session]:", e)
+    return SESSION_ID
+
 # --- 11. WhatsApp Continuous Polling Listener ---
 def start_bot_listener():
+    resolve_openwa_session()
     print(f"[*] Institutional Equity Research Command Center is ACTIVE.")
     print(f"[*] Whitelisted patterns: {ALLOWED_TARGET_PATTERNS}")
     print(f"[*] Monitoring session: {SESSION_ID} ({SESSION_NAME})")
